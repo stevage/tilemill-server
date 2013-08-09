@@ -7,6 +7,8 @@
 
 # Author: Steve Bennett
 
+echo "127.0.01 `hostname`" | sudo tee -a /etc/hosts
+
 wget https://github.com/downloads/mapbox/tilemill/install-tilemill.tar.gz
 tar -xzvf install-tilemill.tar.gz
 
@@ -82,7 +84,7 @@ FOF
 exit
 
 # ==== Automatic start 
-cat > rc.local <<FOF
+cat > /tmp/rc.local <<FOF
 #!/bin/sh -e
 sysctl -w kernel.shmmax=8000000000
 service postgresql start
@@ -91,24 +93,46 @@ service nginx start
 exit 0
 FOF
 
-sudo cp rc.local /etc/rc.local
+sudo cp /tmp/rc.local /etc/rc.local
 
 # === Securing with nginx
 sudo apt-get -y install nginx
 
 cd /etc/nginx
-sudo bash
+sudo bash <<FOF
 printf "maps:$(openssl passwd -crypt 'incorrect cow cell pin')\n" >> htpasswd
 chown root:www-data htpasswd
 chmod 640 htpasswd
-exit
+FOF
 
-
-cat > sites-enabled-default <<FOF
+# In the following config, http_host is literally a dollar sign then http_host
+# whereas IP is a shell variable that should be substituted at the time the config is written.
+cat > /tmp/sites-enabled-default <<FOF
 
 server {
    listen 80;
    server_name localhost;
+   # This configuration allows TileMill to coexist with the tile server (/datasource, /tile) on external port 80.
+   location /tile/ {
+        proxy_set_header Host \$http_host;
+        proxy_pass http://127.0.0.1:20008;
+   
+        
+        #proxy_cache my-cache;
+        #proxy_cache_valid  200 302  60m;
+        #proxy_cache_valid  404      1m;
+    }
+    location /datasource/ {
+        proxy_set_header Host \$http_host;
+        proxy_pass http://127.0.0.1:20008;
+    }
+    #location /maps {
+    # alias   /usr/share/nginx/www/Project-OSRM-Web/WebContent/;
+    #}
+   location /tilemill {
+       rewrite     ^(.*)$ http://$IP:5002 permanent;
+   }
+
    location / {
         proxy_set_header Host \$http_host;
         proxy_pass http://127.0.0.1:20009;
@@ -121,7 +145,7 @@ server {
    listen $IP:20008;
    server_name localhost;
    location / {
-        proxy_set_header Host $http_host;
+        proxy_set_header Host \$http_host;
         proxy_pass http://127.0.0.1:20008;
         auth_basic "Restricted";
         auth_basic_user_file htpasswd;
@@ -131,7 +155,7 @@ server {
 
 FOF
 
-sudo cp sites-enabled-default /etc/nginx/sites-enabled/default
+sudo cp /tmp/sites-enabled-default /etc/nginx/sites-enabled/default
 sudo service nginx restart
 
 echo "Australia/Melbourne" | sudo tee /etc/timezone
