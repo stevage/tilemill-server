@@ -1,4 +1,4 @@
-	#!/bin/bash
+#!/bin/bash
 
 # This script installs TileMill, PostGIS, nginx, and does some basic configuration.
 # The set up it creates has basic security: port 20009 can only be accessed through port 80, which has password auth.
@@ -16,7 +16,7 @@ sudo apt-get install -y policykit-1
 
 #As per https://github.com/gravitystorm/openstreetmap-carto
 
-sudo bash install-tilemill.sh
+#sudo bash install-tilemill.sh
 
 #And hence here: http://www.postgis.org/documentation/manual-2.0/postgis_installation.html
 #? 
@@ -50,6 +50,14 @@ sudo start tilemill
 # Configure Postgres
 
 echo "CREATE ROLE ubuntu WITH LOGIN CREATEDB UNENCRYPTED PASSWORD 'ubuntu'" | sudo -su postgres psql
+# Argh - can't crack the right combination here. I give up in the end and just ubuntu a superuser. Just needs
+# to be able to modify the 'relation' spatial_ref_sys
+echo "GRANT ALL ON DATABASE gis TO ubuntu" | sudo -su postgres psql
+echo "GRANT ALL ON SCHEMA public TO ubuntu" | sudo -su postgres psql
+echo "GRANT ALL ON ALL TABLES IN SCHEMA public TO ubuntu" | sudo -su postgres psql
+#echo "GRANT Superuser, Create role, Create DB, Replication TO ubuntu" | sudo -su postgres psql
+echo "ALTER USER ubuntu WITH SUPERUSER" | sudo -su postgres psql
+
 # sudo -su postgres bash -c 'createuser -d -a -P ubuntu'
 
 #(password 'ubuntu') (blank doesn't work well...)
@@ -100,7 +108,7 @@ sudo apt-get -y install nginx
 
 cd /etc/nginx
 sudo bash <<FOF
-printf "maps:$(openssl passwd -crypt 'incorrect cow cell pin')\n" >> htpasswd
+printf "maps:$(openssl passwd -crypt 'URPA$WD')\n" >> htpasswd
 chown root:www-data htpasswd
 chmod 640 htpasswd
 FOF
@@ -142,7 +150,8 @@ server {
 }
 
 server {
-   listen $IP:20008;
+   #listen $IP:20008;
+   listen 5002;
    server_name localhost;
    location / {
         proxy_set_header Host \$http_host;
