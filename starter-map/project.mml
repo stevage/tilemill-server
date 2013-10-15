@@ -1,0 +1,73 @@
+{
+  "bounds": [
+    111.0059,
+    -44.9648,
+    155.7422,
+    -9.6224
+  ],
+  "center": [
+    145.2832,
+    -35.066,
+    4
+  ],
+  "format": "png",
+  "interactivity": false,
+  "minzoom": 0,
+  "maxzoom": 18,
+  "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+  "Stylesheet": [
+    "style.mss"
+  ],
+  "Layer": [
+    {
+      "geometry": "linestring",
+      "extent": [
+        112.69808944147681,
+        -43.932385183621264,
+        158.4121446687892,
+        -9.375632475695024
+      ],
+      "Datasource": {
+        "type": "postgis",
+        "table": "(select *\nfrom planet_osm_line\nwhere highway in ('motorway','trunk')\n)p",
+        "key_field": "",
+        "geometry_field": "",
+        "extent_cache": "auto",
+        "extent": "12545493.93,-5454984.59,17634359.28,-1048379.81",
+        "host": "localhost",
+        "dbname": "gis",
+        "user": "ubuntu",
+        "password": "ubuntu"
+      },
+      "id": "roads",
+      "class": "",
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "advanced": {},
+      "name": "roads"
+    },
+    {
+      "geometry": "polygon",
+      "extent": [
+        -180,
+        -85.051,
+        180,
+        85.051
+      ],
+      "id": "waterpolygons",
+      "class": "",
+      "Datasource": {
+        "file": "/usr/share/mapbox/water-polygons-split-3857/water_polygons.shp"
+      },
+      "srs-name": "autodetect",
+      "srs": "",
+      "advanced": {},
+      "name": "waterpolygons"
+    }
+  ],
+  "scale": 1,
+  "metatile": 2,
+  "name": "Map starter",
+  "description": "",
+  "attribution": ""
+}
