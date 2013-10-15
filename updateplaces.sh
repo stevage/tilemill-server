@@ -1,5 +1,5 @@
 #!/bin/bash -x
-psql -d gis_aus <<EOF
+psql -d gis <<EOF
 drop table places;
 create table places as
 select town.name, place, town.way, 
@@ -48,5 +48,6 @@ update places set conveniences =
 
 update places
 set amenities = pubs + supermarkets + cafes + restaurants + fuels + fast_foods + bakeries + conveniences;
+create index idx_places on places using gist(way);
 EOF
 
