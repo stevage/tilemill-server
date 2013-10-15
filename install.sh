@@ -8,8 +8,11 @@
 # Author: Steve Bennett
 
 #Move postgres to this directory (if the default location is too small). Comment it out to not move it.
-POSTGRESDIR=/mnt/var/lib
 
+# load configurable settings. alternatively, set them all through environment variables.
+if [ -n "$tm_dbusername" ]; then
+source tm-settings
+fi
 # Get number of cores and RAM
 source ./getspecs.sh
 
@@ -23,10 +26,6 @@ sudo apt-get install -y policykit-1
 
 #As per https://github.com/gravitystorm/openstreetmap-carto
 
-#sudo bash install-tilemill.sh
-
-#And hence here: http://www.postgis.org/documentation/manual-2.0/postgis_installation.html
-#? 
 sudo apt-get install -y postgresql libpq-dev postgis
 # Check to make sure we haven't already run this.
 if [ -n "$POSTGRESDIR" ] && [ ! -d "$POSTGRESDIR/postgresql" ]; then sudo bash <<FOF
@@ -58,7 +57,6 @@ sudo apt-get update
 
 sudo apt-get install -y tilemill
 
-# less /etc/tilemill/tilemill.config
 # Verify that server: true
 
 sudo start tilemill
@@ -70,12 +68,12 @@ sudo start tilemill
 # Configure Postgres
 # Argh - can't crack the right combination here. I give up in the end and just ubuntu a superuser. Just needs
 # to be able to modify the 'relation' spatial_ref_sys
-sudo -u postgres psql <<'FOF'
-CREATE ROLE ubuntu WITH LOGIN CREATEDB UNENCRYPTED PASSWORD 'ubuntu';
-GRANT ALL ON DATABASE gis TO ubuntu;
-GRANT ALL ON SCHEMA public TO ubuntu;
-GRANT ALL ON ALL TABLES IN SCHEMA public TO ubuntu;
-ALTER USER ubuntu WITH SUPERUSER;
+sudo -u postgres psql <<FOF
+CREATE ROLE $tm_dbusername WITH LOGIN CREATEDB UNENCRYPTED PASSWORD '$tm_dbpassword';
+GRANT ALL ON DATABASE gis TO $tm_dbusername;
+GRANT ALL ON SCHEMA public TO $tm_dbusername;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO $tm_dbusername;
+ALTER USER $tm_dbusername WITH SUPERUSER;
 FOF
 # sudo -su postgres bash -c 'createuser -d -a -P ubuntu'
 
@@ -84,27 +82,27 @@ FOF
 # create GIS template
 db=template_gis
 sudo -su postgres bash <<EOF
-createdb --encoding=UTF8 --owner=ubuntu $db
+createdb --encoding=UTF8 --owner=$tb_dbusername $db
 psql -d postgres -c "UPDATE pg_database SET datistemplate='true' WHERE datname='template_gis'"
 
 psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis-1.5/postgis.sql > /dev/null
 psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis-1.5/spatial_ref_sys.sql > /dev/null
 psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis_comments.sql > /dev/null
 psql -d $db -c "GRANT SELECT ON spatial_ref_sys TO PUBLIC;"
-psql -d $db -c "GRANT ALL ON geometry_columns TO ubuntu;"
+psql -d $db -c "GRANT ALL ON geometry_columns TO $tb_dbusername;"
 psql -d $db -c 'create extension hstore;'
 EOF
 
 
 # === Unsecuring TileMill
 
-export IP=`curl http://ifconfig.me`
+export ip=`curl http://ifconfig.me`
 
 cat > tilemill.config <<FOF
 {
   "files": "/usr/share/mapbox",
-  "coreUrl": "$IP:20009",
-  "tileUrl": "$IP:20008",
+  "coreUrl": "$ip:20009",
+  "tileUrl": "$ip:20008",
   "listenHost": "0.0.0.0",
   "server": true
 }
@@ -198,6 +196,12 @@ FOF
 
 sudo cp /tmp/sites-enabled-default /etc/nginx/sites-enabled/default
 sudo service nginx restart
+echo "Let's get some fonts."
+sudo bash <<EOF
+cd /usr/share/fonts/truetype
+wget http://www.fontsquirrel.com/fonts/download/CartoGothic-Std -O CartoGothic-Std.zip 
+unzip CartoGothic-Std.zip
+EOF
 sudo restart tilemill
 
 echo "Australia/Melbourne" | sudo tee /etc/timezone

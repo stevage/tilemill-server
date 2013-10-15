@@ -1,0 +1,6 @@
+export tm_dbusername=ubuntu
+export tm_dbpassword=ubuntu
+export tm_username=tilemill
+export tm_password='#maps'
+export tm_timezone='Australia/Melbourne'
+export POSTGRESDIR=/mnt/var/lib
