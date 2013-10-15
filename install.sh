@@ -10,7 +10,7 @@
 #Move postgres to this directory (if the default location is too small). Comment it out to not move it.
 
 # load configurable settings. alternatively, set them all through environment variables.
-if [ -n "$tm_dbusername" ]; then
+if [ -z "$tm_dbusername" ]; then
 source tm-settings
 fi
 # Get number of cores and RAM
@@ -83,7 +83,7 @@ FOF
 db=template_gis
 sudo -su postgres bash <<EOF
 createdb --encoding=UTF8 --owner=$tb_dbusername $db
-psql -d postgres -c "UPDATE pg_database SET datistemplate='true' WHERE datname='template_gis'"
+psql -d postgres -c "UPDATE pg_database SET datistemplate='true' WHERE datname='$db'"
 
 psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis-1.5/postgis.sql > /dev/null
 psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis-1.5/spatial_ref_sys.sql > /dev/null
@@ -137,7 +137,7 @@ sudo apt-get -y install nginx
 
 cd /etc/nginx
 sudo bash <<FOF
-printf "maps:$(openssl passwd -crypt 'URPA$WD')\n" >> htpasswd
+printf "maps:$(openssl passwd -crypt '$tm_password')\n" >> htpasswd
 chown root:www-data htpasswd
 chmod 640 htpasswd
 FOF
