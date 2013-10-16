@@ -46,7 +46,10 @@ fi
 sudo apt-get install -y software-properties-common git unzip
 sudo add-apt-repository -y ppa:kakrueger/openstreetmap
 sudo apt-get update
-sudo apt-get install -y osm2pgsql
+
+# what if I skip this line?
+###TODO
+#sudo apt-get install -y osm2pgsql
 
 #(leave all defaults)
 
@@ -110,7 +113,7 @@ FOF
 sudo cp tilemill.config /etc/tilemill/tilemill.config
 
 # ======== Postgres performance tuning
-cat | sudo tee -a /etc/postgresql/9.1/main/postgresql.conf <<FOF
+sudo tee -a /etc/postgresql/9.1/main/postgresql.conf <<FOF
 # Settings tuned for TileMill
 shared_buffers = $((MYMEM/4))GB
 autovacuum = on
@@ -122,7 +125,7 @@ wal_buffers = 1MB
 FOF
 
 # ==== Automatic start 
-cat | sudo tee /etc/rc.local <<FOF
+sudo tee /etc/rc.local <<FOF
 #!/bin/sh -e
 sysctl -w kernel.shmmax=$((MYMEM/4 + 1))000000000
 sysctl -w kernel.shmall=$((MYMEM/4 + 1))000000000
@@ -132,12 +135,17 @@ service nginx start
 exit 0
 FOF
 
+sudo source /etc/rc.local
+sudo service postgresql reload
+
 # === Securing with nginx
 sudo apt-get -y install nginx
 
 cd /etc/nginx
+# This probably will break if the password contains bash-recognised characters, but I was defeated
+# by escaping.
 sudo bash <<FOF
-printf "maps:$(openssl passwd -crypt '$tm_password')\n" >> htpasswd
+printf "$tm_username:$(openssl passwd -crypt ""$tm_password"")\n" >> htpasswd
 chown root:www-data htpasswd
 chmod 640 htpasswd
 FOF
@@ -167,7 +175,7 @@ server {
     # alias   /usr/share/nginx/www/Project-OSRM-Web/WebContent/;
     #}
    location /tilemill {
-       rewrite     ^(.*)$ http://$IP:5002 permanent;
+       rewrite     ^(.*)$ http://$ip:5002 permanent;
    }
 
    location / {
@@ -179,7 +187,7 @@ server {
 }
 
 server {
-   #listen $IP:20008;
+   #listen $ip:20008;
    listen 5002;
    server_name localhost;
    location / {
