@@ -6,6 +6,6 @@ echo "--- Start importing into PostGIS"
 echo "--- Start updating place table."
 ./updateplaces.sh
 
-echo "--- Now updating OSRM routing tables."
-mv australia-latest.osm.pbf osrm
-./updateosrm.sh
+#echo "--- Now updating OSRM routing tables."
+#mv australia-latest.osm.pbf osrm
+#./updateosrm.sh

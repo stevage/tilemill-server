@@ -64,7 +64,7 @@ Resources:
             export tm_password='_tm_password'
             export tm_timezone='_tm_timezone'
             export POSTGRESDIR='_POSTGRESDIR'
-            ./install.sh
+            ./install.sh > install.log
 Outputs:
   URL:
     Description: The URL of the website

@@ -19,14 +19,10 @@ source ./getspecs.sh
 
 echo "127.0.0.1 `hostname`" | sudo tee -a /etc/hosts
 
-wget https://github.com/downloads/mapbox/tilemill/install-tilemill.tar.gz
-tar -xzvf install-tilemill.tar.gz
-
-sudo apt-get install -y policykit-1
+sudo apt-get update
 
 #As per https://github.com/gravitystorm/openstreetmap-carto
-
-sudo apt-get install -y postgresql libpq-dev postgis
+sudo apt-get install -y policykit-1 postgresql-9.1 libpq-dev postgis
 # Check to make sure we haven't already run this.
 if [ -n "$POSTGRESDIR" ] && [ ! -d "$POSTGRESDIR/postgresql" ]; then sudo bash <<FOF
 echo Moving postgresql from /var/lib/postgresql to $POSTGRESDIR/postgresql
@@ -41,15 +37,16 @@ chmod a+r $POSTGRESDIR
 service postgresql start
 FOF
 fi
-# Install OSM2pgsql
 
+# Install OSM2pgsql
 sudo apt-get install -y software-properties-common git unzip
 sudo add-apt-repository -y ppa:kakrueger/openstreetmap
 sudo apt-get update
 
 # what if I skip this line?
 ###TODO
-#sudo apt-get install -y osm2pgsql
+export DEBIAN_FRONTEND=noninteractive
+sudo -E apt-get install -y osm2pgsql
 
 #(leave all defaults)
 
@@ -57,51 +54,13 @@ sudo apt-get update
 
 sudo add-apt-repository -y ppa:developmentseed/mapbox
 sudo apt-get update
-
 sudo apt-get install -y tilemill
-
-# Verify that server: true
-
-sudo start tilemill
-
-# To tunnel to the machine, if needed:
-# ssh -CA nectar-maps -L 21009:localhost:20009 -L 21008:localhost:20008
-# Then access it at localhost:21009
-
-# Configure Postgres
-# Argh - can't crack the right combination here. I give up in the end and just ubuntu a superuser. Just needs
-# to be able to modify the 'relation' spatial_ref_sys
-sudo -u postgres psql <<FOF
-CREATE ROLE $tm_dbusername WITH LOGIN CREATEDB UNENCRYPTED PASSWORD '$tm_dbpassword';
-GRANT ALL ON DATABASE gis TO $tm_dbusername;
-GRANT ALL ON SCHEMA public TO $tm_dbusername;
-GRANT ALL ON ALL TABLES IN SCHEMA public TO $tm_dbusername;
-ALTER USER $tm_dbusername WITH SUPERUSER;
-FOF
-# sudo -su postgres bash -c 'createuser -d -a -P ubuntu'
-
-#(password 'ubuntu') (blank doesn't work well...)
-
-# create GIS template
-db=template_gis
-sudo -su postgres bash <<EOF
-createdb --encoding=UTF8 --owner=$tb_dbusername $db
-psql -d postgres -c "UPDATE pg_database SET datistemplate='true' WHERE datname='$db'"
-
-psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis-1.5/postgis.sql > /dev/null
-psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis-1.5/spatial_ref_sys.sql > /dev/null
-psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis_comments.sql > /dev/null
-psql -d $db -c "GRANT SELECT ON spatial_ref_sys TO PUBLIC;"
-psql -d $db -c "GRANT ALL ON geometry_columns TO $tb_dbusername;"
-psql -d $db -c 'create extension hstore;'
-EOF
-
 
 # === Unsecuring TileMill
 
 export ip=`curl http://ifconfig.me`
 
-cat > tilemill.config <<FOF
+sudo tee /etc/tilemill/tilemill.config <<FOF
 {
   "files": "/usr/share/mapbox",
   "coreUrl": "$ip:80",
@@ -110,7 +69,48 @@ cat > tilemill.config <<FOF
   "server": true
 }
 FOF
-sudo cp tilemill.config /etc/tilemill/tilemill.config
+
+sudo start tilemill
+
+# To tunnel to the machine, if needed:
+# ssh -CA nectar-maps -L 21009:localhost:20009 -L 21008:localhost:20008
+# Then access it at localhost:21009
+
+# Configure Postgres
+# Argh - can't crack the right combination here. I give up in the end and just make ubuntu a superuser. Just needs
+# to be able to modify the 'relation' spatial_ref_sys
+sudo -u postgres psql <<FOF
+CREATE ROLE $tm_dbusername WITH LOGIN CREATEDB UNENCRYPTED PASSWORD '$tm_dbpassword';
+GRANT ALL ON SCHEMA public TO $tm_dbusername;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO $tm_dbusername;
+ALTER USER $tm_dbusername WITH SUPERUSER;
+FOF
+
+
+# create GIS template
+db=template_gis
+sudo -su postgres bash <<EOF
+createdb --encoding=UTF8 --owner=$tm_dbusername $db
+psql -d postgres -c "UPDATE pg_database SET datistemplate='true' WHERE datname='$db'"
+
+psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis-1.5/postgis.sql > /dev/null
+psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis-1.5/spatial_ref_sys.sql > /dev/null
+psql -d $db -f /usr/share/postgresql/9.1/contrib/postgis_comments.sql > /dev/null
+psql -d $db -c "GRANT SELECT ON spatial_ref_sys TO PUBLIC;"
+psql -d $db -c "GRANT ALL ON geometry_columns TO $tm_dbusername;"
+psql -d $db -c "create extension hstore;"
+EOF
+
+sudo -u postgres createdb --template=$db gis
+
+sudo -u postgres psql -d gis -c "GRANT ALL ON DATABASE gis TO $tm_dbusername;"
+
+# sudo -su postgres bash -c 'createuser -d -a -P ubuntu'
+
+#(password 'ubuntu') (blank doesn't work well...)
+
+
+
 
 # ======== Postgres performance tuning
 sudo tee -a /etc/postgresql/9.1/main/postgresql.conf <<FOF
@@ -152,7 +152,7 @@ FOF
 
 # In the following config, http_host is literally a dollar sign then http_host
 # whereas IP is a shell variable that should be substituted at the time the config is written.
-cat > /tmp/sites-enabled-default <<FOF
+sudo tee /etc/nginx/sites-enabled/default <<FOF
 
 server {
    listen 80;
@@ -197,12 +197,9 @@ server {
         auth_basic_user_file htpasswd;
     }
 }
-
-
 FOF
 
 
-sudo cp /tmp/sites-enabled-default /etc/nginx/sites-enabled/default
 sudo service nginx restart
 echo "Let's get some fonts."
 sudo bash <<EOF

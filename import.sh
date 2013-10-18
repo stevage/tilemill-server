@@ -4,7 +4,11 @@ echo Creating new database.
 createdb -T template_gis $newdb
 source ./getspecs.sh
 echo Importing with OSM2PGSQL
-osm2pgsql  -S customised.style --database $newdb --slim --create --username ubuntu --hstore --number-processes $MYCORES --unlogged --cache 4000 australia-latest.osm.pbf
+export cachesize=800
+if [ "$MYMEM" -ge 16 ]; then
+  export cachesize=4000
+fi
+osm2pgsql  -S customised.style --database $newdb --slim --create --username ubuntu --hstore --number-processes $MYCORES --unlogged --cache $cachesize australia-latest.osm.pbf
 # some of these will probably fail
 echo Creating indexes
 psql -d $newdb <<EOF
