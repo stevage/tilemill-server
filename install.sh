@@ -10,7 +10,7 @@
 #Move postgres to this directory (if the default location is too small). Comment it out to not move it.
 
 # load configurable settings. alternatively, set them all through environment variables.
-if [ -z "$tm_dbusername" ]; then
+if [ -z "$tm_username" ]; then
 source tm-settings
 fi
 # Get number of cores and RAM
