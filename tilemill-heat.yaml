@@ -1,0 +1,74 @@
+HeatTemplateFormatVersion: '2012-12-12'
+Description: |
+  Template which installs tilemill, by pulling down a Git repo, and setting in environment variables.
+Parameters:
+  KeyName:
+    Type: String
+  InstanceType:
+    Type: String
+  ImageId:
+    Type: String
+  DBUsername: {Default: ubuntu, NoEcho: 'true',
+    Description: The database admin account username, Type: String,
+    MinLength: '1', MaxLength: '16', AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*',
+    ConstraintDescription: must begin with a letter and contain only
+      alphanumeric characters.}
+  DBPassword: {Default: ubuntu, NoEcho: 'true',
+    Description: The database admin account password, Type: String,
+    MinLength: '1', MaxLength: '41', AllowedPattern: '[a-zA-Z0-9]*',
+    ConstraintDescription: must contain only alphanumeric characters.}
+  TileMillUsername: {Default: ubuntu, NoEcho: 'true',
+    Description: The database admin account username, Type: String,
+    MinLength: '1', MaxLength: '16', AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*',
+    ConstraintDescription: must begin with a letter and contain only
+      alphanumeric characters.}
+  TileMillPassword: {Default: ubuntu, NoEcho: 'true',
+    Description: The database admin account password, Type: String,
+    MinLength: '1', MaxLength: '41', AllowedPattern: '[a-zA-Z0-9]*',
+    ConstraintDescription: must contain only alphanumeric characters.}
+  Timezone: {Default: "Australia/Melbourne", Type: String}
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Standard firewall rules
+      SecurityGroupIngress:
+      - {IpProtocol: icmp, FromPort: '-1', ToPort: '-1', CidrIp : 0.0.0.0/0}
+      - {IpProtocol: tcp, FromPort: '22', ToPort: '22', CidrIp: 0.0.0.0/0}
+      - {IpProtocol: tcp, FromPort: '80', ToPort: '80', CidrIp: 0.0.0.0/0}
+  tilemill_server:
+    Type: OS::Nova::Server
+    Properties:
+      image: {Ref: ImageId}
+      flavor: {Ref: InstanceType}
+      key_name: {Ref: KeyName}
+      security_groups: [{Ref: SecurityGroup}]
+      user_data:
+        Fn::Base64:
+          Fn::Replace:
+          - _tm_username: {Ref: TileMillUsername}
+            _tm_password: {Ref: TileMillPassword}
+            _tm_dbusername: {Ref: DBUsername}
+            _tm_dbpassword: {Ref: DBPassword}
+            _tm_timezone: {Ref: Timezone}
+            _POSTGRESDIR: /mnt/var/lib
+          - |
+            #!/bin/bash -v
+            apt-get install -y git
+            cd /tmp
+            git clone https://github.com/stevage/tilemill-server
+            cd tilemill-server
+            export tm_dbusername='_tm_dbusername'
+            export tm_dbpassword='_tm_dbpassword'
+            export tm_username='_tm_username'
+            export tm_password='_tm_password'
+            export tm_timezone='_tm_timezone'
+            export POSTGRESDIR='_POSTGRESDIR'
+            ./install.sh
+Outputs:
+  URL:
+    Description: The URL of the website
+    Value:
+      Fn::Replace:
+      - IpAddress: {'Fn::GetAtt': [tilemill_server, first_private_address]}
+      - http://IpAddress/
