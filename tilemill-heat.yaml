@@ -58,12 +58,13 @@ Resources:
             cd /tmp
             git clone https://github.com/stevage/tilemill-server
             cd tilemill-server
+            echo "# These settings provided through Heat template." >> tm-settings
             #            export tm_dbusername='_tm_dbusername'
             #            export tm_dbpassword='_tm_dbpassword'
-            export tm_username='_tm_username'
-            export tm_password='_tm_password'
-            export tm_timezone='_tm_timezone'
-            export POSTGRESDIR='_POSTGRESDIR'
+            echo "export tm_username='_tm_username'" >> tm-settings
+            echo "export tm_password='_tm_password'" >> tm-settings
+            echo "export tm_timezone='_tm_timezone'" >> tm-settings
+            echo "export POSTGRESDIR='_POSTGRESDIR'" >> tm-settings
             ./install.sh > install.log
 Outputs:
   URL:
