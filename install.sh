@@ -211,6 +211,6 @@ echo "Australia/Melbourne" | sudo tee /etc/timezone
 sudo dpkg-reconfigure --frontend noninteractive tzdata
 
 echo "Tilemill installed and running."
-#./get-waterpolygons.sh
-#./update-data.sh
+./get-waterpolygons.sh
+./update-data.sh
 
