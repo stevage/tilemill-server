@@ -8,15 +8,15 @@ Parameters:
     Type: String
   ImageId:
     Type: String
-#  DBUsername: {Default: ubuntu, NoEcho: 'true',
-#    Description: The database admin account username, Type: String,
-#    MinLength: '1', MaxLength: '16', AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*',
-#    ConstraintDescription: must begin with a letter and contain only
-#      alphanumeric characters.}
-#  DBPassword: {Default: ubuntu, NoEcho: 'true',
-#    Description: The database admin account password, Type: String,
-#    MinLength: '1', MaxLength: '41', AllowedPattern: '[a-zA-Z0-9]*',
-#    ConstraintDescription: must contain only alphanumeric characters.}
+    #  DBUsername: {Default: ubuntu, NoEcho: 'true',
+    #    Description: The database admin account username, Type: String,
+    #    MinLength: '1', MaxLength: '16', AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*',
+    #    ConstraintDescription: must begin with a letter and contain only
+    #      alphanumeric characters.}
+    #  DBPassword: {Default: ubuntu, NoEcho: 'true',
+    #    Description: The database admin account password, Type: String,
+    #    MinLength: '1', MaxLength: '41', AllowedPattern: '[a-zA-Z0-9]*',
+    #    ConstraintDescription: must contain only alphanumeric characters.}
   TileMillUsername: {Default: ubuntu, NoEcho: 'true',
     Description: The database admin account username, Type: String,
     MinLength: '1', MaxLength: '16', AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*',
@@ -48,8 +48,8 @@ Resources:
           Fn::Replace:
           - _tm_username: {Ref: TileMillUsername}
             _tm_password: {Ref: TileMillPassword}
-#            _tm_dbusername: {Ref: DBUsername}
-#            _tm_dbpassword: {Ref: DBPassword}
+            #            _tm_dbusername: {Ref: DBUsername}
+            #            _tm_dbpassword: {Ref: DBPassword}
             _tm_timezone: {Ref: Timezone}
             _POSTGRESDIR: /mnt/var/lib
           - |
@@ -58,8 +58,8 @@ Resources:
             cd /tmp
             git clone https://github.com/stevage/tilemill-server
             cd tilemill-server
-#            export tm_dbusername='_tm_dbusername'
-#            export tm_dbpassword='_tm_dbpassword'
+            #            export tm_dbusername='_tm_dbusername'
+            #            export tm_dbpassword='_tm_dbpassword'
             export tm_username='_tm_username'
             export tm_password='_tm_password'
             export tm_timezone='_tm_timezone'
