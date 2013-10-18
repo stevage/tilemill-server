@@ -104,8 +104,8 @@ export ip=`curl http://ifconfig.me`
 cat > tilemill.config <<FOF
 {
   "files": "/usr/share/mapbox",
-  "coreUrl": "$ip:20009",
-  "tileUrl": "$ip:20008",
+  "coreUrl": "$ip:80",
+  "tileUrl": "$ip:80",
   "listenHost": "0.0.0.0",
   "server": true
 }
@@ -216,7 +216,6 @@ echo "Australia/Melbourne" | sudo tee /etc/timezone
 sudo dpkg-reconfigure --frontend noninteractive tzdata
 
 echo "Tilemill installed and running."
-./get-waterpolygons.sh
-
-./update-data.sh
+#./get-waterpolygons.sh
+#./update-data.sh
 
