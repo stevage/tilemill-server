@@ -139,11 +139,10 @@ sudo service postgresql reload
 # === Securing with nginx
 sudo apt-get -y install nginx
 
-cd /etc/nginx
 # This probably will break if the password contains bash-recognised characters, but I was defeated
 # by escaping.
 sudo bash <<FOF
-printf "$tm_username:$(openssl passwd -crypt ""$tm_password"")\n" >> htpasswd
+printf "$tm_username:$(openssl passwd -crypt ""$tm_password"")\n" >> /etc/nginx/htpasswd
 chown root:www-data htpasswd
 chmod 640 htpasswd
 FOF
@@ -211,6 +210,5 @@ echo "Australia/Melbourne" | sudo tee /etc/timezone
 sudo dpkg-reconfigure --frontend noninteractive tzdata
 
 echo "Tilemill installed and running."
-./get-waterpolygons.sh
 ./update-data.sh
-
+./get-waterpolygons.sh
