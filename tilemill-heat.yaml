@@ -1,6 +1,7 @@
 HeatTemplateFormatVersion: '2012-12-12'
 Description: |
-  Template which installs tilemill, by pulling down a Git repo, and setting in environment variables.
+  Template which installs tilemill, by pulling down a Git repo, and setting in environment variables. Code
+  adapted from Angus Salkeld (https://github.com/asalkeld/tilemill-templates)
 Parameters:
   KeyName:
     Type: String
