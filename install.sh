@@ -56,7 +56,7 @@ FOF
 ./install-nginx.sh
 
 echo "Let's get some fonts."
-push /usr/share/fonts/truetype
+pushd /usr/share/fonts/truetype
 wget -q http://www.fontsquirrel.com/fonts/download/CartoGothic-Std -O CartoGothic-Std.zip 
 unzip CartoGothic-Std.zip
 popd
