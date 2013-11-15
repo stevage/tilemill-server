@@ -56,13 +56,12 @@ FOF
 ./install-nginx.sh
 
 echo "Let's get some fonts."
-pushd
-cd /usr/share/fonts/truetype
+push /usr/share/fonts/truetype
 wget -q http://www.fontsquirrel.com/fonts/download/CartoGothic-Std -O CartoGothic-Std.zip 
 unzip CartoGothic-Std.zip
 popd
 
-restart tilemill
+start tilemill
 
 
 echo "Tilemill installed and running."
