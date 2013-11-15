@@ -68,4 +68,4 @@ echo "Tilemill installed and running."
 echo "Let's get OSM data in the background."
 ./install-postgis.sh
 
-/update-data.sh
+./update-data.sh
