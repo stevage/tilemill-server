@@ -26,17 +26,17 @@ sudo apt-get update
 
 ./install-postgis.sh
 
-#Install TileMill
+echo "Installing TileMill"
 
-sudo add-apt-repository -y ppa:developmentseed/mapbox
-sudo apt-get update
-sudo apt-get install -y tilemill
+add-apt-repository -y ppa:developmentseed/mapbox
+apt-get update
+apt-get install -y tilemill
 
 echo "Reconfiguring TileMill to allow local access through port 80."
 
 export ip=`curl http://ifconfig.me`
 
-sudo tee /etc/tilemill/tilemill.config <<FOF
+cat > tee /etc/tilemill/tilemill.config <<FOF
 {
   "files": "/usr/share/mapbox",
   "coreUrl": "$ip:80",
@@ -46,7 +46,7 @@ sudo tee /etc/tilemill/tilemill.config <<FOF
 }
 FOF
 
-sudo start tilemill
+#sudo start tilemill
 
 # To tunnel to the machine, if needed:
 # ssh -CA nectar-maps -L 21009:localhost:20009 -L 21008:localhost:20008
@@ -56,12 +56,11 @@ sudo start tilemill
 ./install-nginx.sh
 
 echo "Let's get some fonts."
-sudo bash <<EOF
 cd /usr/share/fonts/truetype
-wget http://www.fontsquirrel.com/fonts/download/CartoGothic-Std -O CartoGothic-Std.zip 
+wget -q http://www.fontsquirrel.com/fonts/download/CartoGothic-Std -O CartoGothic-Std.zip 
 unzip CartoGothic-Std.zip
-EOF
-sudo restart tilemill
+
+restart tilemill
 
 
 echo "Tilemill installed and running."
