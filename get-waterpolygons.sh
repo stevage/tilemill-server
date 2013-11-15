@@ -1,7 +1,7 @@
 #!/bin/bash
 sudo -u mapbox bash <<EOF
 cd /usr/share/mapbox
-wget http://data.openstreetmapdata.com/water-polygons-split-3857.zip
+wget http://gis.researchmaps.net/water-polygons-split-3857.zip
 unzip water-polygons-split-3857.zip
 
 EOF
