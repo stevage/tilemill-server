@@ -1,8 +1,9 @@
 #!/bin/bash
 newdb=new
-dbusername=ubuntu
+source ./tm-settings
+dbusername=$tm_dbusername
 echo Creating new database.
-sudo -su postgres createdb -T template_gis --owner=$dbusername $newdb
+sudo -u postgres createdb -T template_gis --owner=$dbusername $newdb
 source ./getspecs.sh
 echo Importing with OSM2PGSQL
 export cachesize=800
@@ -13,6 +14,8 @@ sudo -u ubuntu osm2pgsql  -S customised.style --database $newdb --slim --create 
 # some of these will probably fail
 echo Creating indexes
 sudo -u postgres psql -d $newdb <<EOF
+GRANT SELECT ON geometry_columns to $dbusername;
+
 CREATE INDEX idx_planet_osm_point_tags ON planet_osm_point USING gist(tags);
 CREATE INDEX idx_planet_osm_polygon_tags ON planet_osm_polygon USING gist(tags);
 CREATE INDEX idx_planet_osm_line_tags ON planet_osm_line USING gist(tags);
@@ -23,6 +26,8 @@ CREATE INDEX planet_osm_roads_index ON planet_osm_roads USING gist(way);
 
 create index planet_osm_roads_highways on planet_osm_roads (highway);
 create index planet_osm_line_highways on planet_osm_line (highway);
+
+
 EOF
 echo Cutting over to new database - all connections will be terminated.
 sudo -u postgres psql -d postgres <<EOF
@@ -30,3 +35,5 @@ DROP DATABASE gis_old;
 select pg_terminate_backend(procpid) from pg_stat_activity where datname='gis';
 ALTER DATABASE gis RENAME TO gis_old;
 ALTER DATABASE $newdb RENAME TO gis;
+EOF
+

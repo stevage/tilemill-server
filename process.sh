@@ -6,6 +6,9 @@ select waterway,name,st_simplify(way,300) simplified
 into waterways
 from planet_osm_line
 where waterway is not null and coalesce(tunnel,'no') = 'no';
+
+GRANT SELECT ON waterways TO gis;
+
 EOF
 echo "Calculating city distances."
 #psql -d gis <<EOF

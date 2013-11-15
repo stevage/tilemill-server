@@ -49,5 +49,8 @@ update places set conveniences =
 update places
 set amenities = pubs + supermarkets + cafes + restaurants + fuels + fast_foods + bakeries + conveniences;
 create index idx_places on places using gist(way);
+
+GRANT SELECT ON places TO gis;
+
 EOF
 
