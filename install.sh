@@ -24,8 +24,6 @@ sudo dpkg-reconfigure --frontend noninteractive tzdata
 
 sudo apt-get update
 
-./install-postgis.sh
-
 echo "Installing TileMill"
 
 add-apt-repository -y ppa:developmentseed/mapbox
@@ -65,5 +63,9 @@ start tilemill
 
 
 echo "Tilemill installed and running."
-./update-data.sh
 ./get-waterpolygons.sh
+
+echo "Let's get OSM data in the background."
+./install-postgis.sh
+
+/update-data.sh
