@@ -1,7 +1,9 @@
 #!/bin/bash
+echo "Getting water polygons."
 sudo -u mapbox bash <<EOF
 cd /usr/share/mapbox
 wget -q http://gis.researchmaps.net/water-polygons-split-3857.zip
+sleep 2
 unzip water-polygons-split-3857.zip
 
 EOF
