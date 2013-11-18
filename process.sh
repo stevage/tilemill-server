@@ -1,7 +1,7 @@
 #!/bin/bash
 ./updateplaces.sh
 echo "Creating simplified ways for labelling."
-psql -d gis <<EOF
+sudo -u postgres psql -d gis <<EOF
 select waterway,name,st_simplify(way,300) simplified
 into waterways
 from planet_osm_line
@@ -30,7 +30,7 @@ echo "Calculating city distances."
 #where a.amenity='pub';
 #EOF
 
-psql -d gis <<EOF
+sudo -u postgres psql -d gis <<EOF
 alter table planet_osm_point add column city_distance float;
 alter table planet_osm_polygon add column city_distance float;
 

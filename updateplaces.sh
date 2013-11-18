@@ -1,5 +1,5 @@
 #!/bin/bash -x
-psql -d gis <<EOF
+sudo -u postgres psql -d gis <<EOF
 drop table places;
 create table places as
 select town.name, place, town.way, 
