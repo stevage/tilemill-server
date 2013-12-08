@@ -1,13 +1,26 @@
+# Postgres account names used by osm2pgsql to load OSM extracts
 export tm_dbusername=ubuntu
 export tm_dbpassword=ubuntu
+
+# Account details passed to nginx to provide basic http auth
 export tm_username=tilemill
 export tm_password='#maps'
+
+# New servers work a lot better with a proper timezone set.
 export tm_timezone='Australia/Melbourne'
+
+# Directory to move the Postgres data directory to before importing (because it may get huge).
 export POSTGRESDIR=/mnt/var/lib
 
+# Subdirectory to install OSRM to. Leave blank for no OSRM.
 export osrm_dir=osrm-bicycle
+
+# Name of the (existing) .lua file to link profile.lua to
 export osrm_profile=bicycle
+
+# Options to pass to OSRM when running
 export osrm_port=5011
 export osrm_host=cycletour.org
 
-export osm_extract_cache_url=http://gis.researchmaps.net/australia-latest.osm.pbf
+# Where to get an OSM extract from (used by osm2pgsql and OSRM)
+export osm_extract_url=http://gis.researchmaps.net/australia-latest.osm.pbf

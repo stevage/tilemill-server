@@ -69,3 +69,9 @@ echo "Let's get OSM data in the background."
 ./install-postgis.sh
 
 ./update-data.sh
+
+if [ ! -z ${osrm_dir} ]; then
+echo "Installing OSRM."
+./install-osrm.sh
+fi
+

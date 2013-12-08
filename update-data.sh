@@ -1,8 +1,9 @@
 #!/bin/bash
+source ./tm-settings
 rm -f australia-latest.osm.pbf
 echo --- Downloading data.
 #wget -q http://download.geofabrik.de/openstreetmap/australia-oceania/australia-latest.osm.pbf
-wget -q http://gis.researchmaps.net/australia-latest.osm.pbf
+wget -q ${osm_extract_url} -O incoming.osm.pbf
 echo "--- Start importing into PostGIS"
 ./import.sh
 echo "--- Start updating place table."
