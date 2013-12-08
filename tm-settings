@@ -4,3 +4,10 @@ export tm_username=tilemill
 export tm_password='#maps'
 export tm_timezone='Australia/Melbourne'
 export POSTGRESDIR=/mnt/var/lib
+
+export osrm_dir=osrm-bicycle
+export osrm_profile=bicycle
+export osrm_port=5011
+export osrm_host=cycletour.org
+
+export osm_extract_cache_url=http://gis.researchmaps.net/australia-latest.osm.pbf
