@@ -1,3 +1,39 @@
+# WARNING - Obsolete
+
+These scripts have been replaced by a newer, shinier, Salt-based deployment system called SaltyMill:
+
+https://github.com/stevage/saltymill
+
+SaltyMill does everything these scripts did, and a bit more.
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+# Continue anyway?
+
+These scripts don't work at all on Ubuntu 14.04 (Trusty). I don't remember if they still work on Precise.
+
+## Ok then.
+
 These scripts install TileMill and a stack of related services:
 
 * TileMill
